@@ -1,6 +1,7 @@
 |========================================
  Enchanter Dead Hills Routine. 
- Version 1.04
+ 
+ Version 1.04 (modified)
  
  
  Attempting to clean up some of the problems that people seem to be having. Also looking to 
