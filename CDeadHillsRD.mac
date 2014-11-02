@@ -602,8 +602,9 @@ Sub PullMobA(PullType, MaxMobs, PullRange, MezRange, NumberMobsToCheck)
 			/call Cast "Mana draw" alt 10s
 			/goto :SkipMed 
 			} 
-		/sit
+		/if (!${Me.Sitting}) /sit
 		/echo Medding for some Mana....
+		}
 :MedIt
 		/if (${Me.PctMana}<99) {
 			/if (!${Me.Sitting}) /sit
