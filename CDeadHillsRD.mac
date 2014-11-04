@@ -4,8 +4,8 @@
 |
 |	Adjusted to end the mission at the end of path 2. 
 |     	To put macro back to finishing mission edit the Return Path section:
-|			line 697 "${CampNum}<2" to "${CampNum}<3"
-|			line 701 "${CampNum}==2" to "${CampNum}==3"
+|			line 698 "${CampNum}<2" to "${CampNum}<3"
+|			line 702 "${CampNum}==2" to "${CampNum}==3"
 | 
 |Credit:
 |	Blitter - Author
@@ -20,6 +20,7 @@
 |	Set INI to be character name based
 |	Added a "group status" check and pause to wait for mana/end as needed.
 |	Added Robe setting to INI
+|	Added RankName support
 |
 | Needed files:
 |	wait4res.inc
@@ -174,7 +175,7 @@ Sub Main
 	/delay 3s
 :killmob
 	/if (${Me.State.Equal[HOVER]}) /call Event_Res
-	/if (${Me.Buff[Slackening Wave Rk. II].ID}) {
+	/if (${Me.Buff[${Spell[${SpellAEMez}].RankName}].ID}) {
 		/bc [+y+] Mezzed myself. Waiting. 
 		/delay 1s
 		/goto :killmob
@@ -213,8 +214,8 @@ Sub Main
 | Make sure runes are up. 
 |========================================
 	/if (!${Me.Buff[${SpellRuneBuff}].ID}) {
-		/bc [+g+] Casting - [+y+] ${SpellRune}
-		/cast "${SpellRune}"
+		/bc [+g+] Casting - [+y+] ${Spell[${SpellRune}].RankName}
+		/cast "${Spell[${SpellRune}].RankName}"
 		}
 	/if (${Me.Buff[${Spell[27616].Name}].ID} && ${Me.AltAbilityReady[Veil of Mindshadow]}) {
 		/alt act 791
@@ -233,7 +234,7 @@ Sub Main
 			/alt act 1381
 			/bc [+g+] Second Spire.
 			}	
-		/if (${FindItem[Summoned: Large Modulation Shard].ID} && !${FindItem[Large Modulation Shard].TimerReady}) {
+		/if (${FindItem[Summoned: Large Modulation Shard].ID} && !${FindItem[Large Modulation Shard].TimerReady} && ${Me.PctMana}<70) {
 			/call Cast "Summoned: Large Modulation Shard" item 5s
 			/bc [+g+] clicking mod rod!
 			}
@@ -242,53 +243,53 @@ Sub Main
        	/if (${Me.XTarget}==1 || (${MezTimerTwo.Value} && ${Me.XTarget}>1) && !${Target.Dead}) {
 			/xtar 1
 			/BC  /varset MATarget ${Target.ID}
-			/if (!${Me.Buff[${SpellRuneBuff}].ID}) {
-				/bc [+g+] Casting [+y+] ${SpellRune}...
-				/call cast "${SpellRune}"
+			/if (!${Me.Buff[${Spell[${SpellRune}].RankName}].ID}) {
+				/bc [+g+] Casting [+y+] ${Spell[${SpellRune}].RankName}...
+				/call cast "${Spell[${SpellRune}].RankName}"
 				}
 			/delay 10
 			/if (!(${Target.ID}==${Me.Pet.Target.ID}) && ${Me.Pet.ID}) /pet attack			
-			/if (!${Target.Buff[${SpellTash}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
-				/bc [+g+] Casting [+y+] ${SpellTash}...
-				/call cast "${SpellTash}"
+			/if (!${Target.Buff[${Spell[${SpellTash}].RankName}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
+				/bc [+g+] Casting [+y+] ${Spell[${SpellTash}].RankName}...
+				/call cast "${Spell[${SpellTash}].RankName}"
 				/goto :NextPass
 				}
-			/if (!${Target.Buff[${SpellCripple}].ID} && !${Target.Slowed.ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
-				/bc [+g+] Casting [+y+] ${SpellCripple}
-				/call cast "${SpellCripple}"
+			/if (!${Target.Buff[${Spell[${SpellCripple}].RankName}].ID} && !${Target.Slowed.ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
+				/bc [+g+] Casting [+y+] ${Spell[${SpellCripple}].RankName}
+				/call cast "${Spell[${SpellCripple}].RankName}"
 				/goto :NextPass
 				}
 			/if (!(${Me.Aura[1].Equal[${SpellAura1Message}]}) && !(${Me.Aura[2].Equal[${SpellAura1Message}]})) {
-				/bc [+g+] Casting [+y+] ${SpellAura1}.... 
+				/bc [+g+] Casting [+y+] ${Spell[{SpellAura1}].RankName}.... 
 				/delay 1s
-				/call cast "${SpellAura1}"
+				/call cast "${Spell[{SpellAura1}].RankName}"
 				/delay 3s
 				}
 			/if (!(${Me.Aura[1].Equal[${SpellAura2Message}]}) && !(${Me.Aura[2].Equal[${SpellAura2Message}]})) {
-				/bc [+g+] Casting [+y+] ${SpellAura2}
+				/bc [+g+] Casting [+y+] ${Spell[{SpellAura2}].RankName}
 				/delay 1s
-				/call cast "${SpellAura2}"
+				/call cast "${Spell[{SpellAura2}].RankName}"
 				/delay 3s
 				}
 			/xtar 1
 			/delay 10
 			/if (${Int[${Target.PctHPs}]}<${NukeAt} && ${Int[${Target.PctHPs}]}>${NoNukeAt}) {
 				| Nuke Routines. 
-				/if ((${Me.Gem[${SpellNuke1}]})&&(${Me.SpellReady[${SpellNuke1}]})&&(!${Me.Casting.ID})&& ${DoNuke1}) {
-					/bc [+g+] Casting [+y+] ${SpellNuke1}....
-					/call cast "${SpellNuke1}"
+				/if ((${Me.Gem[${Spell[${SpellNuke1}].RankName}]})&&(${Me.SpellReady[${Spell[${SpellNuke1}].RankName}]})&&(!${Me.Casting.ID})&& ${DoNuke1}) {
+					/bc [+g+] Casting [+y+] ${Spell[${SpellNuke1}].RankName}....
+					/call cast "${Spell[${SpellNuke1}].RankName}"
 					}
-				/if ((${Me.Gem[${SpellNuke2}]})&&(${Me.SpellReady[${SpellNuke2}]})&&(!${Me.Casting.ID})&& ${DoNuke2}) {
-					/bc [+g+] Casting [+y+] ${SpellNuke2}...
-					/call cast "${SpellNuke2}"
+				/if ((${Me.Gem[${Spell[${SpellNuke2}].RankName}]})&&(${Me.SpellReady[${Spell[${SpellNuke2}].RankName}]})&&(!${Me.Casting.ID})&& ${DoNuke2}) {
+					/bc [+g+] Casting [+y+] ${Spell[${SpellNuke2}].RankName}...
+					/call cast "${Spell[${SpellNuke2}].RankName}"
 					}
-				/if ((${Me.Gem[${SpellNuke3}]})&&(${Me.SpellReady[${SpellNuke3}]})&&(!${Me.Casting.ID})&& ${DoNuke3}) {
-					/bc [+g+] Casting [+y+] ${SpellNuke3}...
-					/call cast "${SpellNuke3}"
+				/if ((${Me.Gem[${Spell[${SpellNuke3}].RankName}]})&&(${Me.SpellReady[${Spell[${SpellNuke3}].RankName}]})&&(!${Me.Casting.ID})&& ${DoNuke3}) {
+					/bc [+g+] Casting [+y+] ${Spell[${SpellNuke3}].RankName}...
+					/call cast "${Spell[${SpellNuke3}].RankName}"
 					}
-				/if ((${Me.Gem[${SpellNuke4}]})&&(${Me.SpellReady[${SpellNuke4}]})&&(!${Me.Casting.ID})&& ${DoNuke4}) {
-					/bc [+g+] Casting [+y+] ${SpellNuke4}...
-					/call cast "${SpellNuke4}"
+				/if ((${Me.Gem[${Spell[${SpellNuke4}].RankName}]})&&(${Me.SpellReady[${Spell[${SpellNuke4}].RankName}]})&&(!${Me.Casting.ID})&& ${DoNuke4}) {
+					/bc [+g+] Casting [+y+] ${Spell[${SpellNuke4}].RankName}
+					/call cast "${Spell[${SpellNuke4}].RankName}"
 					}
 				}
 				/delay 5
@@ -300,8 +301,8 @@ Sub Main
 			/delay 1s
 			/if (${Me.XTarget}==2) {
 :ReMez
-				/bc [+g+] Casting [+y+] ${SpellMez} [+g+] on [+r+] ${Target.Name}....
-				/call cast "${SpellMez}"
+				/bc [+g+] Casting [+y+] ${Spell[${SpellMez}].RankName} [+g+] on [+r+] ${Target.Name}....
+				/call cast "${Spell[${SpellMez}].RankName}"
 				/if (!${Target.ID}) /goto :SkipMez
 				/if (${Me.XTarget}<2) /goto :SkipMez
 				/if (!${Macro.Return.Equal["CAST_SUCCESS"]}) /goto :ReMez
@@ -312,8 +313,8 @@ Sub Main
 				/bc [+g+] Casting [+y+] Bite of Tashani AA
 				/alt act 1125
 				/delay 10
-				/bc [+g+] Casting [+y+] ${SpellAEMez}....
-				/call cast "${SpellAEMez}"
+				/bc [+g+] Casting [+y+] ${Spell[${SpellAEMez}].RankName}....
+				/call cast "${Spell[${SpellAEMez}].RankName}"
 				/for MezCount 2 to ${Me.XTarget}
 					/xtar ${MezCount}
 					/delay 10 
@@ -461,23 +462,23 @@ Sub ZoneIn
 	/bc [+m+] cert focus regen sob lev brells vie break
 	/delay 10s
 	/call Event_Status
-	/if (!${Me.Gem[${Buff1}]} ) { 
-      	/memspell 12 "${Buff1}" 
+	/if (!${Me.Gem[${Spell[${Buff1}].RankName}]} ) { 
+      	/memspell 12 "${Spell[${Buff1}].RankName}" 
       	/delay 5s
 		} 	
-	/call cast "${Buff1}"
+	/call cast "${Spell[${Buff1}].RankName}"
 	/delay 5s
-	/if (!${Me.Gem[${Buff2}]} ) { 
-      	/memspell 12 "${Buff2}" 
+	/if (!${Me.Gem[${Spell[${Buff2}].RankName}]} ) { 
+      	/memspell 12 "${Spell[${Buff2}].RankName}" 
       	/delay 5s
 		} 
-	/call cast "${Buff2}"
+	/call cast "${Spell[${Buff2}].RankName}"
 	/delay 5s
-	/if (!${Me.Gem[${Buff3}]} ) { 
-      	/memspell 12 "${Buff3}" 
+	/if (!${Me.Gem[${Spell[${Buff3}].RankName}]} ) { 
+      	/memspell 12 "${Spell[${Buff3}].RankName}" 
       	/delay 5s
 		} 
-	/call cast "${Buff3}"
+	/call cast "${Spell[${Buff3}].RankName}"
 	/delay 5s
 	/call MemSpells
 |========================================	
@@ -587,17 +588,17 @@ Sub PullMobA(PullType, MaxMobs, PullRange, MezRange, NumberMobsToCheck)
     	/end
 		}
  	/if (!(${Me.Aura[1].Equal[${SpellAura1Message}]}) && !(${Me.Aura[2].Equal[${SpellAura1Message}]})) {
-		/echo ${SpellAura1} Down, casting. 
-		/bc [+y+] ${SpellAura1Message} [+g+] down, casting.
+		/echo ${Spell[${SpellAura1}].RankName} Down, casting. 
+		/bc [+y+] ${Spell[${SpellAura1}].RankName} [+g+] down, casting.
 		/delay 1s
-		/call cast "${SpellAura1}"
+		/call cast "${Spell[${SpellAura1}].RankName}"
 		/delay 3s
 		}
    	/if (!(${Me.Aura[1].Equal[${SpellAura2Message}]}) && !(${Me.Aura[2].Equal[${SpellAura2Message}]})) {
-		/echo ${SpellAura2} down, casting
-		/bc [+y+] ${SpellAura2Message} [+g+]down, casting
+		/echo ${Spell[${SpellAura2}].RankName} down, casting
+		/bc [+y+] ${Spell[${SpellAura2}].RankName} [+g+]down, casting
 		/delay 1s
-		/call cast "${SpellAura2}"
+		/call cast "${Spell[${SpellAura2}].RankName}"
 		/delay 3s
 		}
   	/varset EndOfPath 0
@@ -751,76 +752,76 @@ Sub MemSpells
 :SpellChanged
 	/varset changed 0
 	/echo Memming spells. Hang on. 
-	/if (!${Me.Gem[${SpellNuke1}]} ) { 
-   		/memspell 4 "${SpellNuke1}" 
-		/bc [+g+] Memmeing [+y+] ${SpellNuke1} [+g+]- Slot 4
-   		/delay 20s
+	/if (!${Me.Gem[${Spell[${SpellNuke1}].RankName}]} ) { 
+   		/memspell 4 "${Spell[${SpellNuke1}].RankName}" 
+		/bc [+g+] Memmeing [+y+] ${Spell[${SpellNuke1}].RankName} [+g+]- Slot 4
+   		/delay 5s
    		/varset changed 1
 		} 
-   	/if (!${Me.Gem[${SpellNuke2}]} ) { 
-      	/memspell 5 "${SpellNuke2}" 
-		/bc [+g+] Memming [+y+] ${SpellNuke2} [+g+]- Slot 5
-      	/delay 10s
+   	/if (!${Me.Gem[${Spell[${SpellNuke2}].RankName}]} ) { 
+      	/memspell 5 "${Spell[${SpellNuke2}].RankName}" 
+		/bc [+g+] Memming [+y+] ${Spell[${SpellNuke2}].RankName} [+g+]- Slot 5
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellNuke3}]} ) { 
-      	/memspell 6 "${SpellNuke3}" 
-      	/bc [+g+] Memming [+y+] ${SpellNuke3} [+g+]- Slot 6
-		/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellNuke3}].RankName}]} ) { 
+      	/memspell 6 "${Spell[${SpellNuke3}].RankName}" 
+      	/bc [+g+] Memming [+y+] ${Spell[${SpellNuke3}].RankName} [+g+]- Slot 6
+		/delay 5s
      	/varset changed 1
 		}
-	/if (!${Me.Gem[${SpellNuke4}]} ) { 
-      	/memspell 9 "${SpellNuke4}" 
-      	/bc [+g+] Memming [+y+] ${SpellNuke4} [+g+]- Slot 9
-		/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellNuke4}].RankName}]} ) { 
+      	/memspell 9 "${Spell[${SpellNuke4}].RankName}" 
+      	/bc [+g+] Memming [+y+] ${Spell[${SpellNuke4}].RankName} [+g+]- Slot 9
+		/delay 5s
      	/varset changed 1
 		}		
-	/if (!${Me.Gem[${SpellMez}]} ) { 
-      	/memspell 1 "${SpellMez}" 
-		/bc [+g+] Memming [+y+]${SpellMez} [+g+]- Slot 1
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellMez}].RankName}]} ) { 
+      	/memspell 1 "${Spell[${SpellMez}].RankName}" 
+		/bc [+g+] Memming [+y+]${Spell[${SpellMez}].RankName} [+g+]- Slot 1
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellAEMez}]} ) { 
-      	/memspell 11 "${SpellAEMez}" 
-		/bc [+g+] Memming [+y+]${SpellAEMez} [+g+]- Slot 11
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellAEMez}].RankName}]} ) { 
+      	/memspell 11 "${Spell[${SpellAEMez}].RankName}" 
+		/bc [+g+] Memming [+y+]${Spell[${SpellAEMez}].RankName} [+g+]- Slot 11
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellRune}]} ) { 
-      	/memspell 7 "${SpellRune}"
-		/bc [+g+] Memming [+y+]${SpellRune} [+g+]- Slot 7
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellRune}].RankName}]} ) { 
+      	/memspell 7 "${Spell[${SpellRune}].RankName}"
+		/bc [+g+] Memming [+y+]${Spell[${SpellRune}].RankName} [+g+]- Slot 7
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellCripple}]} ) { 
-      	/memspell 3 "${SpellCripple}"
-		/bc [+g+] Memming [+y+]${SpellCripple} [+g+]- Slot 3
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellCripple}].RankName}]} ) { 
+      	/memspell 3 "${Spell[${SpellCripple}].RankName}"
+		/bc [+g+] Memming [+y+]${Spell[${SpellCripple}].RankName} [+g+]- Slot 3
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellDot}]} ) { 
-      	/memspell 8 "${SpellDot}"  
-		/bc [+g+] Memming [+y+]${SpellDot} [+g+]- Slot 8 
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellDot}].RankName}]} ) { 
+      	/memspell 8 "${Spell[${SpellDot}].RankName}"  
+		/bc [+g+] Memming [+y+]${Spell[${SpellDot}].RankName} [+g+]- Slot 8 
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellTash}]} ) { 
-      	/memspell 2 "${SpellTash}" 
-		/bc [+g+] Memming [+y+]${SpellTash} [+g+]- Slot 2
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellTash}].RankName}]} ) { 
+      	/memspell 2 "${Spell[${SpellTash}].RankName}" 
+		/bc [+g+] Memming [+y+]${Spell[${SpellTash}].RankName} [+g+]- Slot 2
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellAura1}]} ) { 
-      	/memspell 10 "${SpellAura1}" 
-		/bc [+g+] Memming [+y+]${SpellAura1} [+g+]- Slot 10
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellAura1}].RankName}]} ) { 
+      	/memspell 10 "${Spell[${SpellAura1}].RankName}" 
+		/bc [+g+] Memming [+y+]${Spell[${SpellAura1}].RankName} [+g+]- Slot 10
+      	/delay 5s
      	/varset changed 1
 		} 
-	/if (!${Me.Gem[${SpellAura2}]} ) { 
-      	/memspell 12 "${SpellAura2}"
-		/bc [+g+] Memming [+y+]${SpellAura2} [+g+]- Slot 12
-      	/delay 10s
+	/if (!${Me.Gem[${Spell[${SpellAura2}].RankName}]} ) { 
+      	/memspell 12 "${Spell[${SpellAura2}].RankName}"
+		/bc [+g+] Memming [+y+]${Spell[${SpellAura2}].RankName} [+g+]- Slot 12
+      	/delay 5s
      	/varset changed 1
 		} 
 	/if (${changed}) {
