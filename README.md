@@ -23,7 +23,7 @@ Credit:
 	Added support for AA purchase
 	Set INI to be character name based
 	Added a "group status" check and pause to wait for mana/end as needed.
-|	Added Robe setting to INI
+	Added Robe setting to INI
 	Added RankName support
 
   Needed files:
