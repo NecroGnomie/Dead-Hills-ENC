@@ -4,8 +4,8 @@
 |
 |	Adjusted to end the mission at the end of path 2. 
 |     	To put macro back to finishing mission edit the Return Path section:
-|			line 698 "${CampNum}<2" to "${CampNum}<3"
-|			line 702 "${CampNum}==2" to "${CampNum}==3"
+|			line 699ish "${CampNum}<2" to "${CampNum}<3"
+|			line 703ish "${CampNum}==2" to "${CampNum}==3"
 | 
 |Credit:
 |	Blitter - Author
@@ -21,6 +21,7 @@
 |	Added a "group status" check and pause to wait for mana/end as needed.
 |	Added Robe setting to INI
 |	Added RankName support
+|	Added a check for group roles and assigned them if not present
 |
 | Needed files:
 |	wait4res.inc
@@ -254,11 +255,17 @@ Sub Main
 				/call cast "${Spell[${SpellTash}].RankName}"
 				/goto :NextPass
 				}
-			/if (!${Target.Buff[${Spell[${SpellCripple}].RankName}].ID} && !${Target.Slowed.ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
+			/if (!${Target.Buff[${Spell[${SpellCripple}].RankName}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
 				/bc [+g+] Casting [+y+] ${Spell[${SpellCripple}].RankName}
 				/call cast "${Spell[${SpellCripple}].RankName}"
 				/goto :NextPass
 				}
+			/if (!${Target.Buff[${Target.Slowed}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
+				/bc [+g+] Casting [+y+] Dready Deeds AA
+				/alt act 753
+				/delay 4s
+				/goto :NextPass
+				}	
 			/if (!(${Me.Aura[1].Equal[${SpellAura1Message}]}) && !(${Me.Aura[2].Equal[${SpellAura1Message}]})) {
 				/bc [+g+] Casting [+y+] ${Spell[{SpellAura1}].RankName}.... 
 				/delay 1s
