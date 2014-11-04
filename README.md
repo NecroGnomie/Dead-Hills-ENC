@@ -1,11 +1,12 @@
 |========================================
  Enchanter Dead Hills Routine. 
  
- Version 1.04 (modified)
+ Version 1.10 (modified)
  
- 
- Attempting to clean up some of the problems that people seem to be having. Also looking to 
- automate more of it instead of using /load etc. Make it a bit faster maybe.
+ 	Adjusted to end the mission at the end of path 2. 
+     	To put macro back to finishing mission edit the Return Path section:
+			line 698 "${CampNum}<2" to "${CampNum}<3"
+			line 702 "${CampNum}==2" to "${CampNum}==3"
  
  
 Credit:
@@ -22,6 +23,8 @@ Credit:
 	Added support for AA purchase
 	Set INI to be character name based
 	Added a "group status" check and pause to wait for mana/end as needed.
+|	Added Robe setting to INI
+	Added RankName support
 
   Needed files:
 	wait4res.inc
