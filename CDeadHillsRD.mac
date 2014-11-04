@@ -1,8 +1,11 @@
 |========================================
 | Enchanter Dead Hills Routine. 
-| Version 1.04
-| Attempting to clean up some of the problems that people seem to be having. Also looking to 
-| automate more of it instead of using /load etc. Make it a bit faster maybe.
+| Version 1.10
+|
+|	Adjusted to end the mission at the end of path 2. 
+|     	To put macro back to finishing mission edit the Return Path section:
+|			line 697 "${CampNum}<2" to "${CampNum}<3"
+|			line 701 "${CampNum}==2" to "${CampNum}==3"
 | 
 |Credit:
 |	Blitter - Author
@@ -16,6 +19,7 @@
 |	Added support for AA purchase
 |	Set INI to be character name based
 |	Added a "group status" check and pause to wait for mana/end as needed.
+|	Added Robe setting to INI
 |
 | Needed files:
 |	wait4res.inc
@@ -30,8 +34,6 @@
 |
 | There are a number of places you can edit this macro to better fit your preferences.
 | Please look it over before using.
-|
-|
 |========================================
 
 #include spell_routines.inc
@@ -91,6 +93,7 @@ Sub Main
  	/declare Buff1 				outer
 	/declare Buff2				outer
 	/declare Buff3				outer
+	/declare Robe				outer
 	/declare IniPathFile		string	outer
   	/declare Path[5,20,2] 		int 	outer
   	/declare MaxPaths 			int 	outer
@@ -197,10 +200,10 @@ Sub Main
    		/if (${Me.XTarget}>0) {
 			/if (${Me.XTarget}==1) { 
   				/xtar 1
-				/delay 10
+				/delay 1s
 			} else { 
 				/xtar 2
-				/delay 10 
+				/delay 1s 
 				}
 			}
 		}	
@@ -213,30 +216,30 @@ Sub Main
 		/bc [+g+] Casting - [+y+] ${SpellRune}
 		/cast "${SpellRune}"
 		}
-	/if (${Me.Buff[${Spell[27616].Name}].ID}) {
+	/if (${Me.Buff[${Spell[27616].Name}].ID} && ${Me.AltAbilityReady[Veil of Mindshadow]}) {
 		/alt act 791
-		/bc [+g+] Casting - [+y+] Veil of Mindshadow
+		/bc [+g+] Casting - [+y+] Mindshadow
 		}
-	/if (!${Me.Buff[Eldritch Rune].ID}) { 
+	/if (!${Me.Buff[Eldritch Rune].ID} && ${Me.AltAbilityReady[Eldritch Rune]}) { 
 		/alt act 173
 		/bc [+g+] Casting - [+y+] Eldritch Rune
 		}
-        /if (${Target.Distance}<70) { 
-			/if (${Me.PctMana}<60 && !${FindItem[Latent Robe of Compulsion].Timer}) {
-				/useitem 17
-				/bc [+g+] Robe Click for Mana
-				}
-			/if (${Me.PctMana}<70 && ${Me.AltAbilityReady[Fundament: Second Spire of Enchantment]}) {
-				/alt act 1381
-				/bc [+g+] Second Spire AA for Mana.
-				}	
-			/if (${FindItem[Summoned: Large Modulation Shard].ID} && !${FindItem[Large Modulation Shard].TimerReady}) {
-				/call Cast "Summoned: Large Modulation Shard" item 5s
-				/bc [+g+] click mod rod!
-				}
-			/if (${Select[${Cursor.ID},79322,79321,79320,76503,76502,64951,57264,52888,52803,52709,52674,18745,6346,3426]}) /autoinv
-			/doevents
-        	/if (${Me.XTarget}==1 || (${MezTimerTwo.Value} && ${Me.XTarget}>1)&&!${Target.Dead}) {
+    /if (${Target.Distance}<70) { 
+		/if (${Me.PctMana}<60 && ${Cast.Ready[${Robe}]}) {
+			/useitem 17
+			/bc [+g+] Clicking ${Robe}
+			}
+		/if (${Me.PctMana}<70 && ${Me.AltAbilityReady[Fundament: Second Spire of Enchantment]}) {
+			/alt act 1381
+			/bc [+g+] Second Spire.
+			}	
+		/if (${FindItem[Summoned: Large Modulation Shard].ID} && !${FindItem[Large Modulation Shard].TimerReady}) {
+			/call Cast "Summoned: Large Modulation Shard" item 5s
+			/bc [+g+] clicking mod rod!
+			}
+		/if (${Select[${Cursor.ID},79322,79321,79320,76503,76502,64951,57264,52888,52803,52709,52674,18745,6346,3426]}) /autoinv
+		/doevents
+       	/if (${Me.XTarget}==1 || (${MezTimerTwo.Value} && ${Me.XTarget}>1) && !${Target.Dead}) {
 			/xtar 1
 			/BC  /varset MATarget ${Target.ID}
 			/if (!${Me.Buff[${SpellRuneBuff}].ID}) {
@@ -247,18 +250,12 @@ Sub Main
 			/if (!(${Target.ID}==${Me.Pet.Target.ID}) && ${Me.Pet.ID}) /pet attack			
 			/if (!${Target.Buff[${SpellTash}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
 				/bc [+g+] Casting [+y+] ${SpellTash}...
-		 		/call cast "${SpellTash}"
+				/call cast "${SpellTash}"
 				/goto :NextPass
 				}
-			/if (!${Target.Buff[${SpellCripple}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
+			/if (!${Target.Buff[${SpellCripple}].ID} && !${Target.Slowed.ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
 				/bc [+g+] Casting [+y+] ${SpellCripple}
 				/call cast "${SpellCripple}"
-				/goto :NextPass
-				}
-			/if (!${Target.Buff[${Target.Slowed}].ID} && ${Int[${Target.PctHPs}]}>${NoDebuffAt}) {
-				/bc [+g+] Casting [+y+] Dready Deeds AA
-				/alt act 753
-				/delay 4s
 				/goto :NextPass
 				}
 			/if (!(${Me.Aura[1].Equal[${SpellAura1Message}]}) && !(${Me.Aura[2].Equal[${SpellAura1Message}]})) {
@@ -267,7 +264,7 @@ Sub Main
 				/call cast "${SpellAura1}"
 				/delay 3s
 				}
-    			/if (!(${Me.Aura[1].Equal[${SpellAura2Message}]}) && !(${Me.Aura[2].Equal[${SpellAura2Message}]})) {
+			/if (!(${Me.Aura[1].Equal[${SpellAura2Message}]}) && !(${Me.Aura[2].Equal[${SpellAura2Message}]})) {
 				/bc [+g+] Casting [+y+] ${SpellAura2}
 				/delay 1s
 				/call cast "${SpellAura2}"
@@ -277,25 +274,24 @@ Sub Main
 			/delay 10
 			/if (${Int[${Target.PctHPs}]}<${NukeAt} && ${Int[${Target.PctHPs}]}>${NoNukeAt}) {
 				| Nuke Routines. 
-
 				/if ((${Me.Gem[${SpellNuke1}]})&&(${Me.SpellReady[${SpellNuke1}]})&&(!${Me.Casting.ID})&& ${DoNuke1}) {
 					/bc [+g+] Casting [+y+] ${SpellNuke1}....
 					/call cast "${SpellNuke1}"
-				}
+					}
 				/if ((${Me.Gem[${SpellNuke2}]})&&(${Me.SpellReady[${SpellNuke2}]})&&(!${Me.Casting.ID})&& ${DoNuke2}) {
 					/bc [+g+] Casting [+y+] ${SpellNuke2}...
 					/call cast "${SpellNuke2}"
-				}
+					}
 				/if ((${Me.Gem[${SpellNuke3}]})&&(${Me.SpellReady[${SpellNuke3}]})&&(!${Me.Casting.ID})&& ${DoNuke3}) {
 					/bc [+g+] Casting [+y+] ${SpellNuke3}...
 					/call cast "${SpellNuke3}"
-				}
+					}
 				/if ((${Me.Gem[${SpellNuke4}]})&&(${Me.SpellReady[${SpellNuke4}]})&&(!${Me.Casting.ID})&& ${DoNuke4}) {
 					/bc [+g+] Casting [+y+] ${SpellNuke4}...
 					/call cast "${SpellNuke4}"
+					}
 				}
-			}
-			/delay 10
+				/delay 5
 :NextPass
 			/doevents
 		}	
@@ -324,8 +320,8 @@ Sub Main
 					/if (!${Target.Buff[${Target.Mezzed}].ID}) /goto :ReAEMez
 					/if (${Me.XTarget}<3) /goto :SkipMez
 				/next MezCount	
-			}
-		/varset MezTimerTwo 360
+				}	
+			/varset MezTimerTwo 360
 :SkipMez
 		}   
   	}  
@@ -447,7 +443,9 @@ Sub ZoneIn
 	/delay 5s
 	/bca //stick hold
 	/delay 30s
-	/bcaa //say when
+	/bca //say when
+	/delay 5s
+	/say when
   	/delay 45s
   	/if (${Zone.ShortName.Not.Equal[deadhills_errand]}) /goto :shortloop
 	/call LoadIni
@@ -455,7 +453,6 @@ Sub ZoneIn
 	/call SetUp
 	/delay 2s
   	/bcaa /keypress CMD_TOGGLETASKWIN
-	/bcaa //rdpause off
 	/call SetupCamp
 	/delay 8s
 |========================================
@@ -469,21 +466,20 @@ Sub ZoneIn
       	/delay 5s
 		} 	
 	/call cast "${Buff1}"
-	/delay 8s
+	/delay 5s
 	/if (!${Me.Gem[${Buff2}]} ) { 
       	/memspell 12 "${Buff2}" 
       	/delay 5s
 		} 
 	/call cast "${Buff2}"
-	/delay 8s
+	/delay 5s
 	/if (!${Me.Gem[${Buff3}]} ) { 
       	/memspell 12 "${Buff3}" 
       	/delay 5s
 		} 
 	/call cast "${Buff3}"
-	/delay 8s
+	/delay 5s
 	/call MemSpells
-	/delay 8s
 |========================================	
 | Load up some clickie buffs on toons. Here we are refreshing basic worn clicky buffs
 |========================================
@@ -545,6 +541,9 @@ Sub SetupCamp
 |	This is adjusted for RaidDruid, using MQ2Moveutil's makecamp function.
 |	Adust these commands if your using different macros/set up
 |========================================
+	/if (${Group.Leader.ID}!=${Me.ID}) {
+		/bca //makeleader ${Me.CleanName}
+		}
 	/bca //makecamp on
 	/delay 1s
 	/bca //makecamp radius 10
@@ -554,9 +553,16 @@ Sub SetupCamp
 	/delay 1s
 	/grouproles set ${Me} 3
 	/delay 1s
-	/grouproles set ${TankName} 2
+	/if (${Spawn[${Group.MainAssist}].Type.Equal[Null]}) {
+		/grouproles set ${TankName} 2
+		/delay 1s
+		}
+	/if (${Spawn[${Group.MainTank}].Type.Equal[Null]}) {
+		/grouproles set ${TankName} 1
+		}
+	/bca //ma1 null
 	/delay 1s
-	/grouproles set ${TankName} 1
+	/bca //usegroupassist on
 	/call Event_Status
 	/return
 
@@ -581,14 +587,14 @@ Sub PullMobA(PullType, MaxMobs, PullRange, MezRange, NumberMobsToCheck)
     	/end
 		}
  	/if (!(${Me.Aura[1].Equal[${SpellAura1Message}]}) && !(${Me.Aura[2].Equal[${SpellAura1Message}]})) {
-		/echo Twincast Down, casting. 
+		/echo ${SpellAura1} Down, casting. 
 		/bc [+y+] ${SpellAura1Message} [+g+] down, casting.
 		/delay 1s
 		/call cast "${SpellAura1}"
 		/delay 3s
 		}
    	/if (!(${Me.Aura[1].Equal[${SpellAura2Message}]}) && !(${Me.Aura[2].Equal[${SpellAura2Message}]})) {
-		/echo Mana Reverb down, casting
+		/echo ${SpellAura2} down, casting
 		/bc [+y+] ${SpellAura2Message} [+g+]down, casting
 		/delay 1s
 		/call cast "${SpellAura2}"
@@ -599,18 +605,11 @@ Sub PullMobA(PullType, MaxMobs, PullRange, MezRange, NumberMobsToCheck)
   	/if (${Me.PctMana}<45) {
 		/if (${Me.AltAbilityReady[Mana draw]}) {
 			/bc [+g+] Casting [+y+] Mana Draw [+g+] for some mana.
-			/call Cast "Mana draw" alt 10s
-			/goto :SkipMed 
+			/call Cast "Mana draw" alt 10s 
 			} 
 		/if (!${Me.Sitting}) /sit
-		/echo Medding for some Mana....
 		}
-:MedIt
-		/if (${Me.PctMana}<99) {
-			/if (!${Me.Sitting}) /sit
-			/goto :MedIt
 :SkipMed
-		}
 :moveloop
 	/call Event_Status
    	/bc [+t+]Path : [+y+]${CampNum}[+t+]  Point : [+y+]${i}  [+x+]
@@ -695,11 +694,11 @@ Sub PullMobA(PullType, MaxMobs, PullRange, MezRange, NumberMobsToCheck)
    		/delay 3s ${NearestSpawn[1,NPC noalert 1].Distance}<160 || ${Me.PctHPs}<60
 		}
    	/if (${i}<1) { 
-     	/if (${EndOfPath}==1 && ${CampNum}<3) {
+     	/if (${EndOfPath}==1 && ${CampNum}<2) {
         	/varcalc CampNum ${CampNum}+1
         	/varset EndOfPath 0
 			}
-     	/if (${EndOfPath}==1 && ${CampNum}==3) {   
+     	/if (${EndOfPath}==1 && ${CampNum}==2) {   
        		/call ReturnToGribble    
 			}
      	/return
@@ -850,33 +849,34 @@ Sub Event_Status
 	/declare DHPause int local
 :Status
 	/varset DHPause 0
+	/target clear
 	/if (${Me.PctEndurance}<50 || ${Me.PctMana}<50) {
 		/target ${Me}
 		/varset DHPause 1
 		/call Event_Pause
 		}
 	/if (${Select[${Group.Member[1].Class.ShortName},SHM,CLR,DRU,WIZ,MAG,ENC,NEC,PAL,SK,BRD,RNG]} && ${Group.Member[1].CurrentMana}<50 || ${Select[${Group.Member[1].Class.ShortName},WAR,MNK,ROG,BER,SHD,PAL,RNG,BRD,BST]} && ${Group.Member[1].PctEndurance}<30) {
-		/target ${Group.Member[1].ID}
+		/target ${Group.Member[1].CleanName}
 		/varset DHPause 1
 		/call Event_Pause
 		}
 	/if (${Select[${Group.Member[2].Class.ShortName},SHM,CLR,DRU,WIZ,MAG,ENC,NEC,PAL,SK,BRD,RNG]} && ${Group.Member[2].CurrentMana}<50 || ${Select[${Group.Member[2].Class.ShortName},WAR,MNK,ROG,BER,SHD,PAL,RNG,BRD,BST]} && ${Group.Member[2].PctEndurance}<30) {
-		/target ${Group.Member[2].ID}
+		/target ${Group.Member[2].CleanName}
 		/varset DHPause 1
 		/call Event_Pause
 		}
 	/if (${Select[${Group.Member[3].Class.ShortName},SHM,CLR,DRU,WIZ,MAG,ENC,NEC,PAL,SK,BRD,RNG]} && ${Group.Member[3].CurrentMana}<50 || ${Select[${Group.Member[3].Class.ShortName},WAR,MNK,ROG,BER,SHD,PAL,RNG,BRD,BST]} && ${Group.Member[3].PctEndurance}<30) {
-		/target ${Group.Member[3].ID}
+		/target ${Group.Member[3].CleanName}
 		/varset DHPause 1
 		/call Event_Pause
 		}
 	/if (${Select[${Group.Member[4].Class.ShortName},SHM,CLR,DRU,WIZ,MAG,ENC,NEC,PAL,SK,BRD,RNG]} && ${Group.Member[4].CurrentMana}<50 || ${Select[${Group.Member[4].Class.ShortName},WAR,MNK,ROG,BER,SHD,PAL,RNG,BRD,BST]} && ${Group.Member[4].PctEndurance}<30) {
-		/target ${Group.Member[4].ID}
+		/target ${Group.Member[4].CleanName}
 		/varset DHPause 1
 		/call Event_Pause
 		}
-	/if (${Select[${Group.Member[5].Class.ShortName},SHM,CLR,DRU,WIZ,MAG,ENC,NEC,PAL,SK,BRD,RNG]} && ${Group.Member[1].CurrentMana}<50 || ${Select[${Group.Member[5].Class.ShortName},WAR,MNK,ROG,BER,SHD,PAL,RNG,BRD,BST]} && ${Group.Member[5].PctEndurance}<30) {
-		/target ${Group.Member[5].ID}
+	/if (${Select[${Group.Member[5].Class.ShortName},SHM,CLR,DRU,WIZ,MAG,ENC,NEC,PAL,SK,BRD,RNG]} && ${Group.Member[5].CurrentMana}<50 || ${Select[${Group.Member[5].Class.ShortName},WAR,MNK,ROG,BER,SHD,PAL,RNG,BRD,BST]} && ${Group.Member[5].PctEndurance}<30) {
+		/target ${Group.Member[5].CleanName}
 		/varset DHPause 1
 		/call Event_Pause
 		}
@@ -934,10 +934,12 @@ Sub LoadIni
 		/ini ${IniSelfBuff} "MySettings" "deadhills_errandCampY" "-251"
 		/ini ${IniSelfBuff} "MySettings" "deadhills_errand" "hillsinto.ini"
 		/ini ${IniSelfBuff} "MySettings" "AAbuy" "FALSE"
+		/ini ${IniSelfBuff} "MySettings" "Robe" "Latent Etheric Robe of Compulsion"
 		/ini ${IniSelfBuff} "MyBuffs" "clickitem1" "casttime"
 		/ini ${IniSelfBuff} "MyBuffs" "clickitem2" "casttime"
 		/ini ${IniSelfBuff} "MyBuffs" "clickitem3" "casttime"
 		/ini ${IniSelfBuff} "MyBuffs" "Staff of Eternal Eloquence" "30"
+
 
 		/endmac
 		} else {	
@@ -977,6 +979,7 @@ Sub LoadIni
 			/varset Buff1 ${Ini[${IniSelfBuff},MySettings,Buff1]}
 			/varset Buff2 ${Ini[${IniSelfBuff},MySettings,Buff2]}
 			/varset Buff3 ${Ini[${IniSelfBuff},MySettings,Buff3]}
+			/varset Robe ${Ini[${IniSelfBuff},MySettings,Robe]}
 			/varset CampX ${Ini[${IniSelfBuff},MySettings,${Zone.ShortName}CampX]}
 			/varset CampY ${Ini[${IniSelfBuff},MySettings,${Zone.ShortName}CampY]}
 			/varset IniPathFile ${Ini[${IniSelfBuff},MySettings,${Zone.ShortName}]}
